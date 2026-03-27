@@ -32,9 +32,7 @@ i18n-embed = { version = "0.16", features = [
 i18n-embed-fl = "0.10"
 rust-embed = "8"
 
-[dependencies.cosmic-files]
-git = "https://github.com/pop-os/cosmic-files.git"
-default-features = false
+mime_guess = "2"
 
 [dependencies.cosmic-syntax-theme]
 git = "https://github.com/pop-os/cosmic-syntax-theme.git"
@@ -47,7 +45,7 @@ features = ["syntect", "vi"]
 git = "https://github.com/pop-os/libcosmic.git"
 default-features = false
 #TODO: a11y feature crashes file choser dialog
-features = ["about", "multi-window", "tokio", "winit", "surface-message"]
+features = ["about", "multi-window", "tokio", "winit", "surface-message", "xdg-portal"]
 
 [target.'cfg(unix)'.dependencies]
 fork = "0.2"
@@ -56,11 +54,10 @@ fork = "0.2"
 xdgen = "0.1"
 
 [features]
-default = ["dbus-config", "gvfs", "wgpu", "wayland"]
+default = ["dbus-config", "wgpu", "wayland"]
 dbus-config = ["libcosmic/dbus-config"]
-gvfs = ["cosmic-files/gvfs"]
-wgpu = ["libcosmic/wgpu", "cosmic-files/wgpu"]
-wayland = ["libcosmic/wayland", "cosmic-files/wayland"]
+wgpu = ["libcosmic/wgpu"]
+wayland = ["libcosmic/wayland"]
 
 [profile.release-with-debug]
 inherits = "release"
@@ -70,7 +67,18 @@ debug = true
 onig = { git = "https://github.com/rust-onig/rust-onig.git", branch = "main" }
 onig_sys = { git = "https://github.com/rust-onig/rust-onig.git", branch = "main" }
 
-# [patch.'https://github.com/pop-os/libcosmic']
-# libcosmic = { path = "../libcosmic" }
-# cosmic-config = { path = "../libcosmic/cosmic-config" }
-# cosmic-theme = { path = "../libcosmic/cosmic-theme" }
+[patch.'https://github.com/pop-os/libcosmic']
+libcosmic = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+cosmic-config = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+cosmic-config-derive = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+cosmic-theme = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_core = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_futures = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_graphics = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_renderer = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_runtime = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_tiny_skia = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_wgpu = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_widget = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+iced_winit = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }

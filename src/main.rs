@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+use cosmic::dialog::file_chooser;
 use cosmic::surface;
 use cosmic::widget::menu::action::MenuAction;
 use cosmic::widget::menu::key_bind::KeyBind;
@@ -21,11 +22,8 @@ use cosmic::{
     style, theme,
     widget::{self, about::About, button, icon, nav_bar, segmented_button},
 };
-use cosmic_files::{
-    dialog::{Dialog, DialogKind, DialogMessage, DialogResult, DialogSettings},
-    mime_icon::{mime_for_path, mime_icon},
-};
 use cosmic_text::{Cursor, Edit, Family, Selection, SwashCache, SyntaxSystem, ViMode};
+use mime_icon::{mime_for_path, mime_icon};
 use notify::{RecursiveMode, Watcher};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -61,6 +59,8 @@ mod menu;
 
 use self::project::ProjectNode;
 mod project;
+
+mod mime_icon;
 
 use self::search::ProjectSearchResult;
 mod search;
@@ -349,7 +349,6 @@ pub enum Message {
     ZoomReset,
     DefaultZoomStep(usize),
     DialogCancel,
-    DialogMessage(DialogMessage),
     Find(Option<bool>),
     FindCaseSensitive(bool),
     FindFocused(bool),
@@ -374,10 +373,10 @@ pub enum Message {
     NotifyWatcher(WatcherWrapper),
     OpenFile(PathBuf),
     OpenFileDialog,
-    OpenFileResult(DialogResult),
+    OpenFileResult(Vec<PathBuf>),
     OpenGitDiff(PathBuf, GitDiff),
     OpenProjectDialog,
-    OpenProjectResult(DialogResult),
+    OpenProjectResult(Vec<PathBuf>),
     OpenRecentFile(usize),
     OpenRecentProject(usize),
     OpenSearchResult(usize, usize),
@@ -396,7 +395,7 @@ pub enum Message {
     Save(Option<segmented_button::Entity>),
     SaveAll,
     SaveAsDialog(Option<segmented_button::Entity>),
-    SaveAsResult(segmented_button::Entity, DialogResult),
+    SaveAsResult(segmented_button::Entity, Option<PathBuf>),
     Scroll(f32),
     SelectAll,
     Surface(surface::Action),
@@ -467,7 +466,6 @@ pub struct App {
     context_page: ContextPage,
     text_box_id: widget::Id,
     auto_scroll: Option<f32>,
-    dialog_opt: Option<Dialog<Message>>,
     dialog_page_opt: Option<DialogPage>,
     find_opt: Option<FindField>,
     find_replace_id: widget::Id,
@@ -1482,7 +1480,6 @@ impl Application for App {
             context_page: ContextPage::Settings,
             text_box_id: widget::Id::unique(),
             auto_scroll: None,
-            dialog_opt: None,
             dialog_page_opt: None,
             find_opt: None,
             find_replace_id: widget::Id::unique(),
@@ -1901,11 +1898,6 @@ impl Application for App {
             Message::DialogCancel => {
                 self.dialog_page_opt = None;
             }
-            Message::DialogMessage(dialog_message) => {
-                if let Some(dialog) = &mut self.dialog_opt {
-                    return dialog.update(dialog_message);
-                }
-            }
             Message::Find(find_opt) => {
                 self.find_opt = find_opt.map(|f| FindField {
                     replace: f,
@@ -2284,43 +2276,46 @@ impl Application for App {
                 return self.update_tab();
             }
             Message::OpenFileDialog => {
-                if self.dialog_opt.is_none() {
-                    let (dialog, command) = Dialog::new(
-                        DialogSettings::new().kind(DialogKind::OpenMultipleFiles),
-                        Message::DialogMessage,
-                        Message::OpenFileResult,
-                    );
-                    self.dialog_opt = Some(dialog);
-                    return command;
-                }
-            }
-            Message::OpenFileResult(result) => {
-                self.dialog_opt = None;
-                match result {
-                    DialogResult::Cancel => {}
-                    DialogResult::Open(paths) => {
-                        for path in paths {
-                            match self.active_tab_mut() {
-                                // Replace the current tab if it was never saved nor is currently modified
-                                // * A tab with a loaded file is not replaced
-                                // * Empty or new tabs are replaced
-                                // * Tabs that are "undone" to being empty and NOT associated with
-                                // a file are replaced
-                                Some(Tab::Editor(tab))
-                                    if tab.path_opt.is_none()
-                                        && !tab.editor.lock().unwrap().changed() =>
-                                {
-                                    self.replace_tab(path, self.tab_model.active());
-                                }
-
-                                _ => {
-                                    self.open_tab(Some(path));
-                                }
-                            }
+                return cosmic::task::future(async {
+                    let dialog = file_chooser::open::Dialog::new().title(fl!("open-file"));
+                    match dialog.open_files().await {
+                        Ok(response) => {
+                            let paths: Vec<PathBuf> = response
+                                .urls()
+                                .iter()
+                                .filter_map(|url| url.to_file_path().ok())
+                                .collect();
+                            action::app(Message::OpenFileResult(paths))
                         }
-                        return self.update_tab();
+                        Err(why) => {
+                            if !matches!(why, file_chooser::Error::Cancelled) {
+                                log::error!("failed to open file dialog: {:?}", why);
+                            }
+                            action::app(Message::OpenFileResult(Vec::new()))
+                        }
+                    }
+                });
+            }
+            Message::OpenFileResult(paths) => {
+                for path in paths {
+                    match self.active_tab_mut() {
+                        // Replace the current tab if it was never saved nor is currently modified
+                        // * A tab with a loaded file is not replaced
+                        // * Empty or new tabs are replaced
+                        // * Tabs that are "undone" to being empty and NOT associated with
+                        // a file are replaced
+                        Some(Tab::Editor(tab))
+                            if tab.path_opt.is_none() && !tab.editor.lock().unwrap().changed() =>
+                        {
+                            self.replace_tab(path, self.tab_model.active());
+                        }
+
+                        _ => {
+                            self.open_tab(Some(path));
+                        }
                     }
                 }
+                return self.update_tab();
             }
             Message::OpenGitDiff(project_path, diff) => {
                 // Close any diff tabs with same path
@@ -2359,8 +2354,7 @@ impl Application for App {
                     },
                     relative_path.display()
                 );
-                let icon =
-                    icon::icon(mime_icon(mime_for_path(&diff.path, None, false), 16)).size(16);
+                let icon = icon::icon(mime_icon(&mime_for_path(&diff.path), 16)).size(16);
                 let tab = Tab::GitDiff(GitDiffTab { title, diff });
                 self.tab_model
                     .insert()
@@ -2372,25 +2366,29 @@ impl Application for App {
                 return self.update_tab();
             }
             Message::OpenProjectDialog => {
-                if self.dialog_opt.is_none() {
-                    let (dialog, command) = Dialog::new(
-                        DialogSettings::new().kind(DialogKind::OpenMultipleFolders),
-                        Message::DialogMessage,
-                        Message::OpenProjectResult,
-                    );
-                    self.dialog_opt = Some(dialog);
-                    return command;
-                }
-            }
-            Message::OpenProjectResult(result) => {
-                self.dialog_opt = None;
-                match result {
-                    DialogResult::Cancel => {}
-                    DialogResult::Open(paths) => {
-                        for path in paths {
-                            self.open_project(path);
+                return cosmic::task::future(async {
+                    let dialog = file_chooser::open::Dialog::new().title(fl!("open-project"));
+                    match dialog.open_folders().await {
+                        Ok(response) => {
+                            let paths: Vec<PathBuf> = response
+                                .urls()
+                                .iter()
+                                .filter_map(|url| url.to_file_path().ok())
+                                .collect();
+                            action::app(Message::OpenProjectResult(paths))
+                        }
+                        Err(why) => {
+                            if !matches!(why, file_chooser::Error::Cancelled) {
+                                log::error!("failed to open folder dialog: {:?}", why);
+                            }
+                            action::app(Message::OpenProjectResult(Vec::new()))
                         }
                     }
+                });
+            }
+            Message::OpenProjectResult(paths) => {
+                for path in paths {
+                    self.open_project(path);
                 }
             }
             Message::OpenRecentFile(index) => {
@@ -2593,51 +2591,50 @@ impl Application for App {
                 return self.update_dialogs();
             }
             Message::SaveAsDialog(entity_opt) => {
-                if self.dialog_opt.is_none() {
-                    let entity = entity_opt.unwrap_or_else(|| self.tab_model.active());
-                    if let Some(Tab::Editor(tab)) = self.tab_model.data::<Tab>(entity) {
-                        let (filename, path_opt) = match &tab.path_opt {
-                            Some(path) => (
-                                path.file_name()
-                                    .and_then(|x| x.to_str())
-                                    .map(|x| x.to_string())
-                                    .unwrap_or(String::new()),
-                                path.parent().map(|x| x.to_path_buf()),
-                            ),
-                            None => (String::new(), None),
-                        };
-                        let mut settings =
-                            DialogSettings::new().kind(DialogKind::SaveFile { filename });
-                        if let Some(path) = path_opt {
-                            settings = settings.path(path);
-                        }
-                        let (dialog, command) =
-                            Dialog::new(settings, Message::DialogMessage, move |result| {
-                                Message::SaveAsResult(entity, result)
-                            });
-                        self.dialog_opt = Some(dialog);
-                        return command;
+                let entity = entity_opt.unwrap_or_else(|| self.tab_model.active());
+                if let Some(Tab::Editor(tab)) = self.tab_model.data::<Tab>(entity) {
+                    let (filename, path_opt) = match &tab.path_opt {
+                        Some(path) => (
+                            path.file_name()
+                                .and_then(|x| x.to_str())
+                                .map(|x| x.to_string())
+                                .unwrap_or(String::new()),
+                            path.parent().map(|x| x.to_path_buf()),
+                        ),
+                        None => (String::new(), None),
+                    };
+                    let mut dialog = file_chooser::save::Dialog::new().file_name(filename);
+                    if let Some(path) = path_opt {
+                        dialog = dialog.directory(path);
                     }
+                    return cosmic::task::future(async move {
+                        match dialog.save_file().await {
+                            Ok(response) => {
+                                let path = response.url().and_then(|url| url.to_file_path().ok());
+                                action::app(Message::SaveAsResult(entity, path))
+                            }
+                            Err(why) => {
+                                if !matches!(why, file_chooser::Error::Cancelled) {
+                                    log::error!("failed to open save dialog: {:?}", why);
+                                }
+                                action::app(Message::SaveAsResult(entity, None))
+                            }
+                        }
+                    });
                 }
             }
-            Message::SaveAsResult(entity, result) => {
-                self.dialog_opt = None;
-                match result {
-                    DialogResult::Cancel => {}
-                    DialogResult::Open(mut paths) => {
-                        if !paths.is_empty() {
-                            let mut title_opt = None;
-                            if let Some(Tab::Editor(tab)) = self.tab_model.data_mut::<Tab>(entity) {
-                                tab.path_opt = Some(paths.remove(0));
-                                title_opt = Some(tab.title());
-                                tab.save();
-                            }
-                            if let Some(title) = title_opt {
-                                self.tab_model.text_set(entity, title);
-                            }
-                            return self.update_dialogs();
-                        }
+            Message::SaveAsResult(entity, path_opt) => {
+                if let Some(path) = path_opt {
+                    let mut title_opt = None;
+                    if let Some(Tab::Editor(tab)) = self.tab_model.data_mut::<Tab>(entity) {
+                        tab.path_opt = Some(path);
+                        title_opt = Some(tab.title());
+                        tab.save();
                     }
+                    if let Some(title) = title_opt {
+                        self.tab_model.text_set(entity, title);
+                    }
+                    return self.update_dialogs();
                 }
             }
             Message::SelectAll => {
@@ -3269,11 +3266,8 @@ impl Application for App {
         content
     }
 
-    fn view_window(&self, window_id: window::Id) -> Element<'_, Message> {
-        match &self.dialog_opt {
-            Some(dialog) => dialog.view(window_id),
-            None => widget::text("Unknown window ID").into(),
-        }
+    fn view_window(&self, _window_id: window::Id) -> Element<'_, Message> {
+        widget::text("Unknown window ID").into()
     }
 
     fn subscription(&self) -> Subscription<Message> {
@@ -3396,10 +3390,6 @@ impl Application for App {
 
                 Message::SystemThemeModeChange(update.config)
             }),
-            match &self.dialog_opt {
-                Some(dialog) => dialog.subscription(),
-                None => Subscription::none(),
-            },
         ];
 
         if let Some(auto_scroll) = self.auto_scroll {
