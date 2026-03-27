@@ -8,8 +8,8 @@
   <update_contact>jeremy@system76.com</update_contact>
   <url type="homepage">https://github.com/pop-os/cosmic-edit</url>
   <url type="bugtracker">https://github.com/pop-os/cosmic-edit</url>
-  <name>COSMIC Text Editor</name>
-  <summary>Text editor for the COSMIC desktop</summary>
+  <name>Text Editor</name>
+  <summary>Text editor</summary>
   <description>
     <p>Text editor that provides advanced features with high performance</p>
     <p xml:lang="ar">محرِّر نصوص يوفر ميزات متقدمة بأداء عالٍ</p>

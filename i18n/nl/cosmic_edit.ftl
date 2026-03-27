@@ -1,4 +1,4 @@
-cosmic-text-editor = COSMIC Tekstbewerker
+cosmic-text-editor = Tekstbewerker
 new-document = Nieuw document
 open-project = Project openen
 todo = Takenlijst
@@ -127,8 +127,8 @@ highlight-current-line = Huidige regel mankeren
 syntax-highlighting = Syntaxiskleuring…
 menu-settings = Instellingen…
 menu-keyboard-shortcuts = Toetsencombinaties…
-menu-about = Over COSMIC Tekstbewerker…
+menu-about = Over Tekstbewerker…
 open-recent-file = Recent bestand openen
 support = Ondersteuning
 repository = Broncode
-comment = Tekstbewerkingsprogramma voor COSMIC
+comment = Tekstbewerkingsprogramma voor

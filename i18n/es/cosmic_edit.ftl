@@ -1,5 +1,5 @@
-cosmic-text-editor = Editor de texto COSMIC
-comment = Editor de texto de escritorio COSMIC
+cosmic-text-editor = Editor de texto
+comment = Editor de texto de escritorio
 new-document = Nuevo documento
 open-project = Abrir proyecto
 todo = TODO
@@ -126,7 +126,7 @@ highlight-current-line = Resaltar línea actual
 syntax-highlighting = Resaltado de sintaxis...
 menu-settings = Configuración...
 menu-keyboard-shortcuts = Atajos de teclado...
-menu-about = Sobre el COSMIC Text Editor...
+menu-about = Sobre el Text Editor...
 open-recent-file = Abrir archivo reciente
 select-all = Seleccionar todo
 repository = Repositorio

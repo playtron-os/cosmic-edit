@@ -16,4 +16,4 @@ Homepage: https://github.com/pop-os/cosmic-edit
 Package: cosmic-edit
 Architecture: amd64 arm64
 Depends: ${misc:Depends}, ${shlibs:Depends}
-Description: Cosmic Text Editor
+Description: Text Editor

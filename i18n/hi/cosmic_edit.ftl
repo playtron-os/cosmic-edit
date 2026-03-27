@@ -1,4 +1,4 @@
-cosmic-text-editor = कॉस्मिक टेक्स्ट एडिटर
+cosmic-text-editor = टेक्स्ट एडिटर
 new-document = नया दस्तावेज़
 open-project = प्रोजेक्ट खोलें
 todo = करने के लिए

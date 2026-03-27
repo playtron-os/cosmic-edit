@@ -1,6 +1,6 @@
 # Testing
 
-This document provides a regression testing checklist for COSMIC Edit. The checklist provides a starting point for Quality Assurance reviews.
+This document provides a regression testing checklist for Text Editor. The checklist provides a starting point for Quality Assurance reviews.
 
 ## Checklist:
 
@@ -24,8 +24,8 @@ This document provides a regression testing checklist for COSMIC Edit. The check
 - [ ] Turn word wrapping off.
 - [ ] Scroll right to the end of the document, then left to the beginning again.
 - [ ] Click and drag to select some text past the horizontal edge of the window.
-- [ ] Close the file, open COSMIC Edit again, and open the file via the recents list.
-- [ ] Close the file again, open COSMIC Edit again, and open the file via the Open dialog.
+- [ ] Close the file, open Text Editor again, and open the file via the recents list.
+- [ ] Close the file again, open Text Editor again, and open the file via the Open dialog.
 - [ ] Turn word wrapping back on.
 
 ### Settings

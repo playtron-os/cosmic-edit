@@ -1,5 +1,5 @@
-# COSMIC Text Editor
-Text editor for the COSMIC desktop
+# Text Editor
+Text editor
 
 ![Screenshot](res/screenshots/screenshot-1.png)
 

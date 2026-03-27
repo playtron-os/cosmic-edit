@@ -1,4 +1,4 @@
-comment = Textredigerare för skrivbordsmiljön COSMIC
+comment = Textredigerare för skrivbordsmiljön
 new-document = Nytt dokument
 open-project = Öppna projekt
 todo = TODO
@@ -121,8 +121,8 @@ highlight-current-line = Markera aktuell rad
 syntax-highlighting = Syntaxmarkering...
 menu-settings = Inställningar…
 menu-keyboard-shortcuts = Tangentbordsgenvägar...
-menu-about = Om COSMIC Textredigerare…
-cosmic-text-editor = COSMIC Textredigerare
+menu-about = Om Textredigerare…
+cosmic-text-editor = Textredigerare
 repository = Källkod
 support = Support
 git-management-description = Githantering är ett utvecklarverktyg som används för versionshantering.
