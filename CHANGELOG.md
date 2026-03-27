@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/playtron-os/cosmic-edit/compare/v1.0.0...v1.1.0) (2026-03-27)
+
+
+### Bug Fixes
+
+* releaserc config ([888ee5b](https://github.com/playtron-os/cosmic-edit/commit/888ee5bacb30785905d4c0f23a12a4ad09aee6d2))
+
+
+### Features
+
+* unpin iced versions ([9af2361](https://github.com/playtron-os/cosmic-edit/commit/9af23610d0ec942c3097e5e8eb6b9598390d293a))
+
 # 1.0.0 (2026-03-27)
 
 
