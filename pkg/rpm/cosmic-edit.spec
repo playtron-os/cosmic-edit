@@ -1,6 +1,6 @@
 Name:           cosmic-edit
 Epoch:          1
-Version: 1.0.8
+Version: 1.0.0
 Release:        1%{?dist}
 Summary:        Text Editor (Playtron fork)
 
