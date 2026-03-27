@@ -63,8 +63,8 @@ impl EditorTab {
         {
             let mut font_system = font_system().write().unwrap();
             // Set a minimal size before it is updated by draw
-            buffer.set_size(font_system.raw(), Some(0.0), Some(0.0));
-            buffer.set_text(font_system.raw(), "", &attrs, Shaping::Advanced, None);
+            buffer.set_size(Some(0.0), Some(0.0));
+            buffer.set_text("", &attrs, Shaping::Advanced, None);
         }
 
         let editor = SyntaxEditor::new(
