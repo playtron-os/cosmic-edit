@@ -1091,7 +1091,7 @@ impl App {
                                 widget::row::with_children(vec![
                                     icon.into(),
                                     widget::text(text.clone()).into(),
-                                    widget::space::horizontal().into(),
+                                    widget::horizontal_space().into(),
                                     widget::button::standard(fl!("stage"))
                                         .on_press(Message::GitStage(
                                             project_path.clone(),
@@ -1132,7 +1132,7 @@ impl App {
                                 widget::row::with_children(vec![
                                     icon.into(),
                                     widget::text(text.clone()).into(),
-                                    widget::space::horizontal().into(),
+                                    widget::horizontal_space().into(),
                                     widget::button::standard(fl!("unstage"))
                                         .on_press(Message::GitUnstage(
                                             project_path.clone(),
@@ -1670,7 +1670,7 @@ impl Application for App {
                     if let Some(Tab::Editor(tab)) = self.tab_model.data::<Tab>(*entity) {
                         let mut row = widget::row::with_capacity(3).align_y(Alignment::Center);
                         row = row.push(widget::text(tab.title()));
-                        row = row.push(widget::space::horizontal());
+                        row = row.push(widget::horizontal_space());
                         if let Some(_path) = &tab.path_opt {
                             row = row.push(
                                 widget::button::standard(fl!("save"))
@@ -3191,7 +3191,7 @@ impl Application for App {
                     widget::tooltip::Position::Top,
                 )
                 .into(),
-                widget::space::horizontal().into(),
+                widget::horizontal_space().into(),
                 button::custom(icon_cache_get("window-close-symbolic", 16))
                     .on_press(Message::Find(None))
                     .padding(space_xxs)
@@ -3248,16 +3248,13 @@ impl Application for App {
 
             column = column.push(
                 widget::row::with_children(vec![
-                    widget::checkbox(self.config.find_case_sensitive)
-                        .label(fl!("case-sensitive"))
+                    widget::checkbox(fl!("case-sensitive"), self.config.find_case_sensitive)
                         .on_toggle(Message::FindCaseSensitive)
                         .into(),
-                    widget::checkbox(self.config.find_use_regex)
-                        .label(fl!("use-regex"))
+                    widget::checkbox(fl!("use-regex"), self.config.find_use_regex)
                         .on_toggle(Message::FindUseRegex)
                         .into(),
-                    widget::checkbox(self.config.find_wrap_around)
-                        .label(fl!("wrap-around"))
+                    widget::checkbox(fl!("wrap-around"), self.config.find_wrap_around)
                         .on_toggle(Message::FindWrapAround)
                         .into(),
                 ])
@@ -3304,7 +3301,7 @@ impl Application for App {
                 }
                 _ => None,
             }),
-            Subscription::run_with(TypeId::of::<WatcherSubscription>(), |_| {
+            Subscription::run_with_id(TypeId::of::<WatcherSubscription>(), {
                 stream::channel(
                     100,
                     |mut output: futures::channel::mpsc::Sender<Message>| async move {

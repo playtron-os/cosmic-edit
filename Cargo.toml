@@ -82,3 +82,6 @@ iced_tiny_skia = { git = "https://github.com/playtron-os/libcosmic.git", rev = "
 iced_wgpu = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
 iced_widget = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
 iced_winit = { git = "https://github.com/playtron-os/libcosmic.git", rev = "2a9deff09" }
+
+[patch.'https://github.com/pop-os/cosmic-text']
+cosmic-text = { git = "https://github.com/pop-os/cosmic-text//", rev = "f31b9d8" }

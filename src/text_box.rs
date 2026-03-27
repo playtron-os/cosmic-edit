@@ -273,7 +273,7 @@ where
     }
 
     fn layout(
-        &mut self,
+        &self,
         _tree: &mut widget::Tree,
         _renderer: &Renderer,
         limits: &layout::Limits,
@@ -303,15 +303,15 @@ where
     }
 
     fn operate(
-        &mut self,
+        &self,
         tree: &mut widget::Tree,
-        layout: Layout<'_>,
+        _layout: Layout<'_>,
         _renderer: &Renderer,
         operation: &mut dyn Operation,
     ) {
         let state = tree.state.downcast_mut::<State>();
 
-        operation.focusable(self.id.as_ref(), layout.bounds(), state);
+        operation.focusable(state, self.id.as_ref());
     }
 
     fn mouse_interaction(
@@ -371,10 +371,10 @@ where
 
         let view_position = layout.position() + [self.padding.left, self.padding.top].into();
         let view_w = cmp::min(viewport.width as i32, layout.bounds().width as i32)
-            - self.padding.x() as i32
+            - (self.padding.left + self.padding.right) as i32
             - scrollbar_size;
         let view_h = cmp::min(viewport.height as i32, layout.bounds().height as i32)
-            - self.padding.y() as i32;
+            - (self.padding.top + self.padding.bottom) as i32;
 
         let scale_factor = style.scale_factor as f32;
         let metrics = self.metrics.scale(scale_factor);
@@ -657,26 +657,18 @@ where
             renderer.with_transformation(Transformation::scale(1.0 / scale_factor), |renderer| {
                 // Draw cached image (only has line numbers)
                 if let Some(ref handle) = *handle_opt {
-                    let image_size = image::Renderer::measure_image(renderer, handle)
-                        .unwrap_or_else(|| Size::new(1, 1));
+                    let image_size = image::Renderer::measure_image(renderer, handle);
                     image::Renderer::draw_image(
                         renderer,
-                        image::Image {
-                            handle: handle.clone(),
-                            filter_method: image::FilterMethod::Nearest,
-                            rotation: Radians(0.0),
-                            border_radius: [0.0; 4].into(),
-                            opacity: 1.0,
-                            snap: false,
-                        },
+                        handle.clone(),
+                        image::FilterMethod::Nearest,
                         Rectangle::new(
                             Point::new(0.0, 0.0),
                             Size::new(image_size.width as f32, image_size.height as f32),
                         ),
-                        Rectangle::new(
-                            Point::new(0.0, 0.0),
-                            Size::new(image_size.width as f32, image_size.height as f32),
-                        ),
+                        Radians(0.0),
+                        1.0,
+                        [0.0; 4],
                     );
                 }
 
@@ -929,17 +921,18 @@ where
         log::trace!("redraw {}, {}: {:?}", view_w, view_h, duration);
     }
 
-    fn update(
+    fn on_event(
         &mut self,
         tree: &mut widget::Tree,
-        event: &Event,
+        event: Event,
         layout: Layout<'_>,
         cursor_position: mouse::Cursor,
         _renderer: &Renderer,
         _clipboard: &mut dyn Clipboard,
         shell: &mut Shell<'_, Message>,
-        _viewport: &Rectangle<f32>,
-    ) {
+        _viewport: &Rectangle,
+    ) -> Status {
+        let mut status = Status::Ignored;
         let state = tree.state.downcast_mut::<State>();
         let editor_offset_x = state.editor_offset_x.get();
         let scale_factor = state.scale_factor.get();
@@ -1017,54 +1010,54 @@ where
                 ..
             }) if state.is_focused => match key {
                 Named::ArrowLeft => {
-                    motion_modifiers(&mut editor, Motion::Left, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::Left, modifiers);
+                    status = Status::Captured;
                 }
                 Named::ArrowRight => {
-                    motion_modifiers(&mut editor, Motion::Right, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::Right, modifiers);
+                    status = Status::Captured;
                 }
                 Named::ArrowUp => {
-                    motion_modifiers(&mut editor, Motion::Up, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::Up, modifiers);
+                    status = Status::Captured;
                 }
                 Named::ArrowDown => {
-                    motion_modifiers(&mut editor, Motion::Down, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::Down, modifiers);
+                    status = Status::Captured;
                 }
                 Named::Home => {
-                    motion_modifiers(&mut editor, Motion::Home, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::Home, modifiers);
+                    status = Status::Captured;
                 }
                 Named::End => {
-                    motion_modifiers(&mut editor, Motion::End, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::End, modifiers);
+                    status = Status::Captured;
                 }
                 Named::PageUp => {
-                    motion_modifiers(&mut editor, Motion::PageUp, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::PageUp, modifiers);
+                    status = Status::Captured;
                 }
                 Named::PageDown => {
-                    motion_modifiers(&mut editor, Motion::PageDown, *modifiers);
-                    shell.capture_event();
+                    motion_modifiers(&mut editor, Motion::PageDown, modifiers);
+                    status = Status::Captured;
                 }
                 Named::Escape => {
                     editor.action(Action::Escape);
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
                 Named::Enter => {
                     editor.action(Action::Enter);
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
                 Named::Backspace => {
-                    delete_modifiers(&mut editor, Motion::LeftWord, *modifiers);
+                    delete_modifiers(&mut editor, Motion::LeftWord, modifiers);
                     editor.action(Action::Backspace);
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
                 Named::Delete => {
-                    delete_modifiers(&mut editor, Motion::RightWord, *modifiers);
+                    delete_modifiers(&mut editor, Motion::RightWord, modifiers);
                     editor.action(Action::Delete);
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
                 Named::Tab => {
                     if !modifiers.control() && !modifiers.alt() {
@@ -1073,7 +1066,7 @@ where
                         } else {
                             editor.action(Action::Indent);
                         }
-                        shell.capture_event();
+                        status = Status::Captured;
                     }
                 }
                 _ => (),
@@ -1090,7 +1083,7 @@ where
                     if !character.is_control() {
                         editor.action(Action::Insert(character));
                     }
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
             }
             Event::Keyboard(KeyEvent::ModifiersChanged(modifiers)) => {
@@ -1100,7 +1093,7 @@ where
                 } else if !modifiers.shift() && state.modifiers.shift() {
                     *state.shift_anchor.lock().unwrap() = None;
                 }
-                state.modifiers = *modifiers;
+                state.modifiers = modifiers;
             }
             Event::Mouse(MouseEvent::ButtonPressed(button)) => {
                 if let Some(p) = cursor_position.position_in(layout.bounds()) {
@@ -1218,14 +1211,14 @@ where
                         }));
                     }
 
-                    shell.capture_event();
+                    status = Status::Captured;
                 } else {
                     state.is_focused = false;
                 }
             }
             Event::Mouse(MouseEvent::ButtonReleased(Button::Left)) => {
                 state.dragging = None;
-                shell.capture_event();
+                status = Status::Captured;
                 if let Some(on_auto_scroll) = &self.on_auto_scroll {
                     shell.publish(on_auto_scroll(None));
                 }
@@ -1300,7 +1293,7 @@ where
                             }
                         }
                     }
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
             }
             Event::Mouse(MouseEvent::WheelScrolled { delta }) => {
@@ -1332,7 +1325,7 @@ where
                             .max(0.0);
                         buffer.set_scroll(scroll);
                     });
-                    shell.capture_event();
+                    status = Status::Captured;
                 }
             }
             _ => (),
@@ -1347,6 +1340,7 @@ where
                 shell.publish(on_changed.clone());
             }
         }
+        status
     }
 }
 
