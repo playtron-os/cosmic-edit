@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/playtron-os/cosmic-edit/compare/v1.1.0...v1.1.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* update icons ([ec8d62f](https://github.com/playtron-os/cosmic-edit/commit/ec8d62fb432a997228fbb70ed0a8ba50b58525f4))
+
 # [1.1.0](https://github.com/playtron-os/cosmic-edit/compare/v1.0.0...v1.1.0) (2026-03-27)
 
 
