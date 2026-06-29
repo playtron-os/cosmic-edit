@@ -10,7 +10,7 @@ Source0:        %{name}-%{_arch}.tar.gz
 
 # No BuildRequires - binary is pre-built
 
-Requires:       (cosmic-icon-theme >= 1.0.0 with cosmic-icon-theme < 1.1.0)
+Requires:       (cosmic-icon-theme >= 1.0.0 with cosmic-icon-theme < 2.0.0)
 
 %description
 Text editor for the COSMIC desktop environment.
