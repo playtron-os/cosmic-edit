@@ -1068,6 +1068,16 @@ where
                         status = Status::Captured;
                     }
                 }
+                Named::Space => {
+                    // Space is delivered as a Named key, so without an explicit
+                    // arm it falls through to `_ => ()` below and never reaches
+                    // the character insertion branch, making the space bar
+                    // appear dead in the editor (HUM-367).
+                    if !modifiers.logo() && !modifiers.control() && !modifiers.alt() {
+                        editor.action(Action::Insert(' '));
+                        status = Status::Captured;
+                    }
+                }
                 _ => (),
             },
             Event::Keyboard(KeyEvent::KeyPressed { text, .. }) if state.is_focused => {
