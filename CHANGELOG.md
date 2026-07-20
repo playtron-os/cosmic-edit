@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/playtron-os/cosmic-edit/compare/v1.1.3...v1.1.4) (2026-07-20)
+
+
+### Bug Fixes
+
+* insert space in text editor (HUM-367) ([3dc622c](https://github.com/playtron-os/cosmic-edit/commit/3dc622cbd59efc90b7e6be1e6f8d050ea04a58fa))
+
 ## [1.1.3](https://github.com/playtron-os/cosmic-edit/compare/v1.1.2...v1.1.3) (2026-06-29)
 
 
