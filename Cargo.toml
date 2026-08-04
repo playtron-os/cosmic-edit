@@ -67,18 +67,28 @@ debug = true
 onig = { git = "https://github.com/rust-onig/rust-onig.git", branch = "main" }
 onig_sys = { git = "https://github.com/rust-onig/rust-onig.git", branch = "main" }
 
+# Pinned to `fix/theme-seed-8cb10bf`-style port branch `fix/theme-seed-7c4bf15`:
+# upstream 7c4bf15 (the base this crate compiles against) plus the per-mode
+# theme-seed fix. Without it, `system_light()` layers the light config over
+# `Theme::default()` == `preferred_theme()`, which is dark on any desktop whose
+# XDG_CURRENT_DESKTOP lacks "gnome" (HUMAIN:COSMIC). With no
+# `/usr/share/cosmic/com.system76.CosmicTheme.Light` layer installed every
+# colour key is absent, so the app renders light chrome over a dark body.
+#
+# Do NOT drop the branch and track `master`: it has moved on to a much newer
+# upstream that removes `cosmic::iced_core` and `widget::horizontal_space`.
 [patch.'https://github.com/pop-os/libcosmic']
-libcosmic = { git = "https://github.com/playtron-os/libcosmic.git" }
-cosmic-config = { git = "https://github.com/playtron-os/libcosmic.git" }
-cosmic-config-derive = { git = "https://github.com/playtron-os/libcosmic.git" }
-cosmic-theme = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_core = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_futures = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_graphics = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_renderer = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_runtime = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_tiny_skia = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_wgpu = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_widget = { git = "https://github.com/playtron-os/libcosmic.git" }
-iced_winit = { git = "https://github.com/playtron-os/libcosmic.git" }
+libcosmic = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+cosmic-config = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+cosmic-config-derive = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+cosmic-theme = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_core = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_futures = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_graphics = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_renderer = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_runtime = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_tiny_skia = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_wgpu = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_widget = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
+iced_winit = { git = "https://github.com/playtron-os/libcosmic.git", branch = "fix/theme-seed-7c4bf15" }
