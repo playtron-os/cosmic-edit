@@ -8,6 +8,8 @@ License:        GPL-3.0-only
 URL:            https://github.com/pop-os/cosmic-edit
 Source0:        %{name}-%{_arch}.tar.gz
 
+%global debug_package %{nil}
+
 # No BuildRequires - binary is pre-built
 
 Requires:       (cosmic-icon-theme >= 1.0.0 with cosmic-icon-theme < 2.0.0)

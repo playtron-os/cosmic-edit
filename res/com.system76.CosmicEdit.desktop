@@ -9,3 +9,7 @@ MimeType=text/plain;
 Icon=com.system76.CosmicEdit
 Categories=COSMIC;Utility;TextEditor;
 Keywords=Text;Editor;
+# Icon is full-colour first-party artwork, shipped without a tile so the dock,
+# taskbar and notifications render it bare. Shells that draw a tile put this
+# glyph on a light card at its authored size.
+X-Playtron-IconStyle=fullcolor
