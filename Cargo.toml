@@ -38,7 +38,7 @@ mime_guess = "2"
 git = "https://github.com/pop-os/cosmic-syntax-theme.git"
 
 [dependencies.cosmic-text]
-git = "https://github.com/pop-os/cosmic-text.git"
+version = "0.19"
 features = ["syntect", "vi"]
 
 [dependencies.libcosmic]
