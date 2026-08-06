@@ -1,3 +1,11 @@
+## [1.1.6](https://github.com/playtron-os/cosmic-edit/compare/v1.1.5...v1.1.6) (2026-08-06)
+
+
+### Bug Fixes
+
+* **theme:** pin libcosmic to the branch carrying the theme-seed fix ([f0cf863](https://github.com/playtron-os/cosmic-edit/commit/f0cf863cf39bd4d7243b3d9d79247acc355fd978))
+* update deps ([fe92897](https://github.com/playtron-os/cosmic-edit/commit/fe92897f175401333f37e2de030de43bcb83d6af))
+
 ## [1.1.5](https://github.com/playtron-os/cosmic-edit/compare/v1.1.4...v1.1.5) (2026-08-05)
 
 
