@@ -1,3 +1,10 @@
+## [1.1.7](https://github.com/playtron-os/cosmic-edit/compare/v1.1.6...v1.1.7) (2026-11-02)
+
+
+### Bug Fixes
+
+* **deps:** tint a named icon only when its file is symbolic ([9ce0991](https://github.com/playtron-os/cosmic-edit/commit/9ce09915c08b2ad8fc88b976c0a1030358593cc1))
+
 ## [1.1.6](https://github.com/playtron-os/cosmic-edit/compare/v1.1.5...v1.1.6) (2026-08-06)
 
 
